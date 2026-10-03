@@ -1,0 +1,151 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Account;
+use App\Models\AccountingAccount;
+use App\Models\AccountMapping;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+
+class PaymentAccountService
+{
+    public function __construct(private AccountingService $accounting, private AccountingModeService $mode) {}
+
+    public function ensureMapping(Account $account): AccountingAccount
+    {
+        $id = $this->accounting->getMappedAccount(
+            Account::class, $account->id, $this->accounting->getRoleAccountId(AccountingService::ROLE_CASH)
+        );
+        $accountingAccount = AccountingAccount::findOrFail($id);
+        if (!$accountingAccount->is_active && $account->is_active) {
+            $accountingAccount->is_active = true;
+            $accountingAccount->save();
+        }
+        return $accountingAccount;
+    }
+
+    public function deactivate(Account $account): void
+    {
+        DB::transaction(function () use ($account) {
+            $account->is_active = false;
+            $account->save();
+
+            $mapped = $this->mappedAccountingAccount($account);
+            if ($mapped) {
+                $mapped->is_active = false;
+                $mapped->save();
+            }
+        });
+    }
+
+    public function reactivate(Account $account): void
+    {
+        DB::transaction(function () use ($account) {
+            $account->is_active = true;
+            $account->save();
+
+            $mapped = $this->mappedAccountingAccount($account);
+            if ($mapped) {
+                $mapped->is_active = true;
+                $mapped->save();
+            } elseif ($this->mode->isDoubleEntryAuthoritative()) {
+                $this->ensureMapping($account);
+            }
+        });
+    }
+
+    public function mappedAccountingAccount(Account $account): ?AccountingAccount
+    {
+        $mapping = AccountMapping::where('mapped_type', Account::class)->where('mapped_id', $account->id)->first();
+        return $mapping ? AccountingAccount::find($mapping->accounting_account_id) : null;
+    }
+
+    public function isValid(Account $account): bool
+    {
+        $mapped = $this->mappedAccountingAccount($account);
+        return $account->is_active && $mapped && $mapped->is_active
+            && $mapped->account_type === 'asset' && (bool) $mapped->is_cash_account;
+    }
+
+    public function journalBalance(Account $account, ?string $asOf = null): ?float
+    {
+        $mapped = $this->mappedAccountingAccount($account);
+        if (!$mapped || !$mapped->is_active || $mapped->account_type !== 'asset' || !$mapped->is_cash_account) return null;
+        $query = DB::table('journal_lines')->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
+            ->where('journal_lines.accounting_account_id', $mapped->id);
+        if ($asOf) $query->whereDate('journal_entries.entry_date', '<=', $asOf);
+        return (float) $query->selectRaw('COALESCE(SUM(journal_lines.debit - journal_lines.credit), 0) balance')->value('balance');
+    }
+
+    public function decorate(Collection $accounts): Collection
+    {
+        return $accounts->each(function (Account $account) {
+            $account->mapped_account = $this->mappedAccountingAccount($account);
+            $account->journal_balance = $this->journalBalance($account);
+            $account->mapping_valid = $this->isValid($account);
+        });
+    }
+
+    public function validOperationalAccounts(): Collection
+    {
+        $accounts = Account::where('is_active', true)->get();
+        return $this->mode->isLegacy() ? $accounts : $accounts->filter(fn ($account) => $this->isValid($account))->values();
+    }
+
+    /**
+     * Accounts which may fund a supplier payment.
+     *
+     * Legacy installations use the operational accounts.is_payment marker. If
+     * a ledger mapping exists, it must still resolve to an active Cash/Bank
+     * asset; this prevents an A/R or other non-cash mapping from being offered.
+     * Authoritative double-entry installations always require that mapping.
+     */
+    public function validSupplierPaymentSourceAccounts(): Collection
+    {
+        return Account::where('is_active', true)
+            ->where('is_payment', true)
+            ->get()
+            ->filter(function (Account $account) {
+                if ($this->mode->isDoubleEntryAuthoritative()) {
+                    return $this->isValid($account);
+                }
+
+                $mapped = $this->mappedAccountingAccount($account);
+
+                return !$mapped || (
+                    $mapped->is_active
+                    && $mapped->account_type === 'asset'
+                    && (bool) $mapped->is_cash_account
+                );
+            })
+            ->values();
+    }
+
+    public function assertValidSupplierPaymentSourceId(int $accountId): int
+    {
+        if (!$this->validSupplierPaymentSourceAccounts()->contains('id', $accountId)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'account_id' => __('db.payment_account_invalid_mapping'),
+            ]);
+        }
+
+        return $accountId;
+    }
+
+    public function assertValidId(int $accountId): int
+    {
+        $account = Account::whereKey($accountId)->where('is_active', true)->first();
+        if (!$account || ($this->mode->isDoubleEntryAuthoritative() && !$this->isValid($account))) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'account_id' => __('db.payment_account_invalid_mapping'),
+            ]);
+        }
+        return $accountId;
+    }
+
+    public function assertValidDepositReceivingAccountId(int $accountId): int
+    {
+        return $this->assertValidId($accountId);
+    }
+}

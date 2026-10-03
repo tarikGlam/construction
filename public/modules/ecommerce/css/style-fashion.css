@@ -1,0 +1,100 @@
+/* SalePro eCommerce — Fashion Theme */
+.theme-fashion {
+    --theme-color:#171717;
+    --fashion-ink:#171717;
+    --fashion-muted:#77716d;
+    --fashion-canvas:#fbf8f5;
+    --fashion-border:#e8e1dc;
+    background:#fff;
+    color:var(--fashion-ink);
+}
+.theme-fashion .demo-product-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:26px}.theme-fashion .demo-product-card .single-product-item{min-height:330px;background:#f7f2ed}.theme-fashion .demo-product-card .product-img{width:100%;height:330px;object-fit:cover}.theme-fashion .demo-product-card .single-product-wrapper{border:0}.theme-fashion .demo-product-card .product-details{padding:15px 2px 24px}.theme-fashion .demo-product-card form,.theme-fashion .demo-product-card .button.style1{opacity:0;transition:opacity .25s ease}.theme-fashion .demo-product-card:hover form,.theme-fashion .demo-product-card:hover .button.style1{opacity:1}.theme-fashion .demo-brand-pill{border:0;border-bottom:1px solid #d8d0ca;background:#fff}.theme-fashion .demo-brand-monogram{font:400 24px Georgia,serif}.theme-fashion footer{border-top:1px solid #3a3a3a}
+.theme-fashion .container-fluid { max-width:1440px; }
+.theme-fashion a { transition:color .25s ease, opacity .25s ease, transform .25s ease, border-color .25s ease; }
+.theme-fashion .fashion-announcement { background:var(--fashion-ink); color:#fff; min-height:34px; display:flex; align-items:center; text-align:center; font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+.theme-fashion .header-middle { min-height:94px; background:#fff; border-bottom:0; }
+.theme-fashion .header-middle .container-fluid { max-width:1320px; }
+.theme-fashion .header-middle .logo img { max-height:64px; width:auto; }
+.theme-fashion .header-middle>.container-fluid>.d-flex { align-items:center !important; }
+.theme-fashion .header-search { max-width:260px !important; margin:0; }
+.theme-fashion .header-search-container { width:calc(100% - 46px); }
+.theme-fashion .header-search input { height:42px; margin-top:0; border:0; border-bottom:1px solid #bdb8b4; border-radius:0; padding-left:8px; background:transparent; }
+.theme-fashion .header-search .btn-search { width:42px; height:42px; margin:0; padding:0; border:0; background:transparent; color:var(--fashion-ink); }
+.theme-fashion .offset-menu-wrapper { max-width:330px; }
+.theme-fashion .offset-menu-wrapper li { padding:0 9px; text-transform:uppercase; letter-spacing:.06em; font-size:11px; }
+.theme-fashion .cart__menu .total { display:none; }
+.theme-fashion .wishlist__menu .badge,.theme-fashion .cart__menu .badge { border-radius:50%; }
+.theme-fashion .header-bottom { background:#fff; border-top:1px solid #eee9e5; border-bottom:1px solid #eee9e5; line-height:48px; }
+.theme-fashion .main-menu ul li a { color:#252525; font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:.12em; padding:0 18px; }
+.theme-fashion .main-menu ul li a:hover { color:var(--theme-color); }
+.theme-fashion .fashion-hero { padding:0; margin:0; }
+.theme-fashion .fashion-hero-container { max-width:100%; padding-left:0; padding-right:0; }
+.theme-fashion .fashion-hero .carousel-item { border-radius:0; background:#eee9e5; }
+.theme-fashion .fashion-hero .single-carousel-item img { width:100%; min-height:470px; max-height:720px; object-fit:cover; display:block; }
+.theme-fashion .fashion-hero .carousel-control-prev,.theme-fashion .fashion-hero .carousel-control-next { width:48px; height:48px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,.88); color:#111; opacity:1; }
+.theme-fashion .fashion-edit { padding:70px 0 46px; overflow:visible; }
+.theme-fashion .fashion-section-heading { max-width:650px; margin:0 auto 34px; text-align:center; }
+.theme-fashion .fashion-kicker { display:block; margin-bottom:7px; color:var(--theme-color); font-size:11px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; }
+.theme-fashion .fashion-section-heading h2 { margin-bottom:8px; font-family:Georgia,'Times New Roman',serif; color:var(--fashion-ink); font-size:34px; font-weight:400; letter-spacing:.01em; }
+.theme-fashion .fashion-section-heading p { color:var(--fashion-muted); font-size:14px; }
+.theme-fashion .fashion-category-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+.theme-fashion .fashion-category-card { display:block; color:var(--fashion-ink); overflow:hidden; }
+.theme-fashion .fashion-category-image { position:relative; height:390px; background:var(--fashion-canvas); overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.theme-fashion .fashion-category-image img { width:100%; height:100%; object-fit:cover; transition:transform .7s cubic-bezier(.2,.7,.2,1); }
+.theme-fashion .fashion-category-image .material-symbols-outlined { font-size:56px; color:#b5a9a0; }
+.theme-fashion .fashion-category-card:hover .fashion-category-image img { transform:scale(1.035); }
+.theme-fashion .fashion-category-copy { padding:15px 2px 4px; }
+.theme-fashion .fashion-category-copy strong { display:block; font-family:Georgia,'Times New Roman',serif; font-size:20px; font-weight:400; }
+.theme-fashion .fashion-category-copy span { display:inline-flex; align-items:center; gap:5px; margin-top:5px; color:#77716d; font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+.theme-fashion .fashion-category-copy i { font-size:15px; }
+.theme-fashion .fashion-story-strip { padding:22px 0; background:var(--fashion-canvas); border-top:1px solid var(--fashion-border); border-bottom:1px solid var(--fashion-border); }
+.theme-fashion .fashion-story-grid { display:grid; grid-template-columns:repeat(3,1fr); }
+.theme-fashion .fashion-story-grid>div { display:grid; grid-template-columns:42px 1fr; grid-template-rows:auto auto; column-gap:12px; padding:5px 32px; border-right:1px solid var(--fashion-border); }
+.theme-fashion .fashion-story-grid>div:last-child { border-right:0; }
+.theme-fashion .fashion-story-grid .material-symbols-outlined { grid-row:1/3; align-self:center; font-size:29px; color:var(--fashion-ink); }
+.theme-fashion .fashion-story-grid strong { font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
+.theme-fashion .fashion-story-grid small { color:var(--fashion-muted); font-size:11px; }
+.theme-fashion .fashion-widget-stack>section,.theme-fashion .fashion-recently-viewed>section { padding-top:56px; padding-bottom:34px; }
+.theme-fashion .section-title { text-align:center; margin-bottom:28px !important; }
+.theme-fashion .section-title h3 { font-family:Georgia,'Times New Roman',serif; font-size:29px; font-weight:400; color:var(--fashion-ink); }
+.theme-fashion .single-product-wrapper { border:0; border-radius:0; background:#fff; box-shadow:none; }
+.theme-fashion .single-product-wrapper:hover { box-shadow:none; }
+.theme-fashion .product-img { background:#f7f4f1; overflow:hidden; }
+.theme-fashion .product-img img { transition:transform .55s ease; }
+.theme-fashion .single-product-wrapper:hover .product-img img { transform:scale(1.025); }
+.theme-fashion .product-content { padding:14px 2px 20px; text-align:center; }
+.theme-fashion .product-name { color:#2a2928; font-size:13px; font-weight:500; }
+.theme-fashion .price { color:#171717; font-size:14px; font-weight:600; }
+.theme-fashion .old-price { color:#9a938e; }
+.theme-fashion .button,.theme-fashion a.button { border-radius:0; text-transform:uppercase; letter-spacing:.09em; }
+.theme-fashion .button.style1,.theme-fashion a.button.style1 { background:#171717; }
+.theme-fashion .button.style1:hover,.theme-fashion a.button.style1:hover { background:var(--theme-color); }
+.theme-fashion footer { background:#171717; }
+
+@media(max-width:991px){
+  .theme-fashion .fashion-category-grid{grid-template-columns:repeat(2,1fr)}
+  .theme-fashion .fashion-category-image{height:340px}
+  .theme-fashion .fashion-story-grid>div{padding:5px 14px}
+}
+@media(max-width:767px){
+  .theme-fashion .header-middle{min-height:72px}
+  .theme-fashion .header-search{display:none}
+  .theme-fashion .header-middle .logo img{max-height:50px}
+  .theme-fashion .fashion-hero .single-carousel-item img{min-height:280px; max-height:440px}
+  .theme-fashion .fashion-edit{padding:42px 0 30px}
+  .theme-fashion .fashion-section-heading h2{font-size:28px}
+  .theme-fashion .fashion-category-grid{grid-template-columns:repeat(2,1fr); gap:10px}
+  .theme-fashion .fashion-category-image{height:230px}
+  .theme-fashion .fashion-category-copy strong{font-size:17px}
+  .theme-fashion .fashion-category-copy span{font-size:9px}
+  .theme-fashion .fashion-story-grid{grid-template-columns:1fr}
+  .theme-fashion .fashion-story-grid>div{border-right:0; border-bottom:1px solid var(--fashion-border); padding:12px 3px}
+  .theme-fashion .fashion-story-grid>div:last-child{border-bottom:0}
+}
+@media(max-width:420px){
+  .theme-fashion .fashion-category-image{height:190px}
+}
+@media(max-width:767px){.theme-fashion .demo-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.theme-fashion .demo-product-card .single-product-item,.theme-fashion .demo-product-card .product-img{height:230px;min-height:230px}.theme-fashion .demo-product-card form,.theme-fashion .demo-product-card .button.style1{opacity:1}}
+
+.theme-fashion .fashion-demo-hero{min-height:620px;display:flex;align-items:center;background-size:cover;background-position:center}.theme-fashion .fashion-hero-copy{max-width:480px;padding:90px 0;color:var(--fashion-ink)}.theme-fashion .fashion-hero-copy>span{font-size:11px;letter-spacing:.2em;text-transform:uppercase}.theme-fashion .fashion-hero-copy h1{margin:12px 0 18px;font:400 58px/1.05 Georgia,'Times New Roman',serif}.theme-fashion .fashion-hero-copy p{color:#635d59;font-size:15px;line-height:1.7}.theme-fashion .fashion-hero-copy a{display:inline-block;margin-top:18px;padding-bottom:5px;border-bottom:1px solid #171717;color:#171717;text-transform:uppercase;letter-spacing:.12em;font-size:11px}.theme-fashion .fashion-promo{min-height:380px;display:flex;flex-direction:column;justify-content:center;padding:55px 8%;background-size:cover;background-position:center;color:#2a2928}.theme-fashion .fashion-promo span{text-transform:uppercase;letter-spacing:.18em;font-size:10px}.theme-fashion .fashion-promo strong{margin:10px 0;font:400 38px Georgia,'Times New Roman',serif}.theme-fashion .fashion-promo em{font-style:normal;text-decoration:underline;text-transform:uppercase;letter-spacing:.1em;font-size:10px}.theme-fashion .fashion-secondary{background:var(--fashion-canvas)}
+@media(max-width:767px){.theme-fashion .fashion-demo-hero{min-height:470px;background-position:60% center}.theme-fashion .fashion-hero-copy{max-width:60%;padding:55px 0}.theme-fashion .fashion-hero-copy h1{font-size:36px}.theme-fashion .fashion-promo{min-height:260px;background-position:center}.theme-fashion .fashion-promo strong{font-size:28px}}

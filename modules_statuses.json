@@ -1,0 +1,10 @@
+{
+    "Middleware": true,
+    "Manufacturing": true,
+    "Project": true,
+    "Repair": true,
+    "AIAssistant": true,
+    "ZatcaIntegrationKsa": true,
+    "IndiaGST": true,
+    "VCardNfc": true
+}

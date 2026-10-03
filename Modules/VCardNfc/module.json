@@ -1,0 +1,13 @@
+{
+    "name": "VCardNfc",
+    "alias": "vcardnfc",
+    "description": "Digital vCard, QR and NFC profile module",
+    "keywords": ["vcard", "nfc", "qr"],
+    "priority": 0,
+    "providers": [
+        "Modules\\VCardNfc\\Providers\\VCardNfcServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

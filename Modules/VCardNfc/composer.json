@@ -1,0 +1,9 @@
+{
+    "name": "lioncoders/vcard-nfc",
+    "description": "SalePro vCard and NFC module",
+    "autoload": {
+        "psr-4": {
+            "Modules\\VCardNfc\\": ""
+        }
+    }
+}
