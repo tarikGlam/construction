@@ -66,6 +66,13 @@ use App\Http\Controllers\Api\ActivityLogController;
 
 use Illuminate\Support\Facades\Route;
 
+// The legacy mobile API is a retail surface. Construction-specific APIs can
+// be registered in the Construction module when needed; do not expose the
+// retail resources in the standalone Construction edition.
+if (config('app.vertical') === 'construction') {
+    return;
+}
+
 /*
 |--------------------------------------------------------------------------
 | API Routes

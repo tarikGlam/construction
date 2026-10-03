@@ -14,10 +14,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\File;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\TaxController;
-use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
@@ -96,6 +94,7 @@ use App\Http\Controllers\InstallmentPlanController;
 // Standalone's provider adds web; the SaaS tenant loader does not.
 // Include it here only in SaaS so both loaders get one web middleware group.
 $isSaaS = (bool) config('database.connections.saleprosaas_landlord');
+$isConstructionEdition = config('app.vertical') === 'construction';
 $webMiddleware = [];
 if ($isSaaS) {
     $webMiddleware = [
@@ -106,7 +105,7 @@ if ($isSaaS) {
     ];
 }
 
-Route::middleware($webMiddleware)->group(function () use ($isSaaS) {
+Route::middleware($webMiddleware)->group(function () use ($isSaaS, $isConstructionEdition) {
 
 Route::get('webview/auth', function (Request $request) {
     // Get token from Authorization header
@@ -132,73 +131,11 @@ Route::get('webview/auth', function (Request $request) {
     return redirect($redirect . $separator . 'app=true');
 });
 
-Route::get('/debug/{status}', function ($status) {
-    if (!in_array($status, ['true', 'false'])) {
-        return response()->json(['message' => 'Invalid status. Use true or false.'], 400);
-    }
-
-    $envPath = base_path('.env');
-    $envContent = File::get($envPath);
-
-    // Regex to match and replace APP_DEBUG=...
-    $pattern = '/^APP_DEBUG=.*/m';
-    $replacement = "APP_DEBUG={$status}";
-
-    if (preg_match($pattern, $envContent)) {
-        $newContent = preg_replace($pattern, $replacement, $envContent);
-    } else {
-        $newContent = $envContent . PHP_EOL . $replacement;
-    }
-
-    File::put($envPath, $newContent);
-
-    // Clear Laravel's cache so the new debug setting takes effect
-    Artisan::call('config:clear');
-
-    return response()->json(['message' => "APP_DEBUG successfully set to {$status}."]);
-});
-
-Route::get('migrate', function () use ($isSaaS) {
-    if ($isSaaS) {
-        Artisan::call('tenants:migrate');
-        Artisan::call('tenants:seed');
-        dd('migrated and seeded for all tenants');
-    }
-
-    Artisan::call('migrate');
-    Artisan::call('db:seed');
-    dd('migrated');
-});
-
-Route::get('clear', function () {
-    Artisan::call('optimize:clear');
-    cache()->forget('biller_list');
-    cache()->forget('brand_list');
-    cache()->forget('category_list');
-    cache()->forget('coupon_list');
-    cache()->forget('customer_list');
-    cache()->forget('customer_group_list');
-    cache()->forget('product_list');
-    cache()->forget('product_list_with_variant');
-    cache()->forget('warehouse_list');
-    cache()->forget('table_list');
-    cache()->forget('tax_list');
-    cache()->forget('currency');
-    cache()->forget('general_setting');
-    cache()->forget('pos_setting');
-    cache()->forget('user_role');
-    cache()->forget('permissions');
-    cache()->forget('role_has_permissions');
-    cache()->forget('role_has_permissions_list');
-    dd('cleared');
-});
-
-
 // Security: production maintenance actions (debug toggle, migrate/seed, cache clear)
 // must not be exposed as public web routes. Use CLI / hosting control panel instead.
 
 // Tenant provisioning is handled centrally; the installer belongs to standalone.
-if (!$isSaaS) {
+if (!$isSaaS && !$isConstructionEdition) {
     Route::controller(InstallController::class)->group(function () {
         Route::get('install/step-1', 'installStep1')->name('install-step-1');
         Route::get('install/step-2', 'installStep2')->name('install-step-2');
@@ -248,7 +185,7 @@ Route::group(['middleware' => 'auth'], function () {
     });
 });
 
-Route::group(['middleware' => ['common', 'auth', 'active', 'warehouse.access']], function () {
+Route::group(['middleware' => ['common', 'auth', 'active', 'warehouse.access']], function () use ($isConstructionEdition) {
 
     Route::get('/languages', [LanguageController::class, 'index'])->name('languages');
     Route::post('/languages/create', [LanguageController::class, 'store']);
@@ -262,12 +199,14 @@ Route::group(['middleware' => ['common', 'auth', 'active', 'warehouse.access']],
     Route::put('/translations/{id}', [TranslationController::class, 'update']);
     Route::delete('/translations/{id}', [TranslationController::class, 'destroy']);
 
-    Route::controller(HomeController::class)->group(function () {
+    Route::controller(HomeController::class)->group(function () use ($isConstructionEdition) {
         Route::get('/', 'index');
         Route::get('/dashboard', 'dashboard');
 
-        Route::get('new-release', 'newVersionReleasePage')->name('new-release');
-        Route::post('version-upgrade', 'versionUpgrade')->name('version-upgrade');
+        if (!$isConstructionEdition) {
+            Route::get('new-release', 'newVersionReleasePage')->name('new-release');
+            Route::post('version-upgrade', 'versionUpgrade')->name('version-upgrade');
+        }
 
         Route::get('/yearly-best-selling-price', 'yearlyBestSellingPrice');
         Route::get('/yearly-best-selling-qty', 'yearlyBestSellingQty');
@@ -1007,11 +946,6 @@ Route::group(['middleware' => ['common', 'auth', 'active', 'warehouse.access']],
     });
     Route::resource('coupons', CouponController::class);
 
-    Route::get('phpfileinfo', function () {
-        phpinfo();
-    })->name('phpfileinfo');
-
-
     // Operational payment-account routes must support both legacy and
     // double-entry modes. The controller redirects legacy balance sheet /
     // account statement behavior appropriately when double-entry is active.
@@ -1123,12 +1057,14 @@ Route::group(['middleware' => ['common', 'auth', 'active', 'warehouse.access']],
 
     Route::resource('custom-fields', CustomFieldController::class);
 
-    Route::controller(AddonInstallController::class)->group(function () {
-        Route::post('saas-install', 'saasInstall')->name('saas.install');
-        Route::post('ecommerce-install', 'ecommerceInstall')->name('ecommerce.install');
-        Route::post('woocommerce-install', 'woocommerceInstall')->name('woocommerce.install');
-        Route::post('api-install', 'apiInstall')->name('api.install');
-    });
+    if (!$isConstructionEdition) {
+        Route::controller(AddonInstallController::class)->group(function () {
+            Route::post('saas-install', 'saasInstall')->name('saas.install');
+            Route::post('ecommerce-install', 'ecommerceInstall')->name('ecommerce.install');
+            Route::post('woocommerce-install', 'woocommerceInstall')->name('woocommerce.install');
+            Route::post('api-install', 'apiInstall')->name('api.install');
+        });
+    }
 
     Route::prefix('whatsapp')->group(function () {
         Route::get('/settings', [WhatsappController::class, 'settings'])->name('whatsapp.settings');

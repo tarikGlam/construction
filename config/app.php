@@ -15,6 +15,10 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    // This repository is the standalone Construction edition. Route files can
+    // use this switch to avoid registering vertical-specific surfaces.
+    'vertical' => env('APP_VERTICAL', 'construction'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
