@@ -9,7 +9,7 @@ class Warehouse extends Model
     use \App\Traits\WarehouseVisibilityScoped;
 
     protected $fillable = [
-        "name", "phone", "email", "address", "qr_code_id", "pos_type", "is_active"
+        "name", "phone", "email", "address", "qr_code_id", "pos_type", "is_active", "store_type", "project_id", "site_id"
     ];
 
     public function product()

@@ -1,10 +1,11 @@
 {
     "Middleware": true,
-    "Manufacturing": true,
+    "Manufacturing": false,
     "Project": true,
-    "Repair": true,
-    "AIAssistant": true,
-    "ZatcaIntegrationKsa": true,
-    "IndiaGST": true,
-    "VCardNfc": true
+    "Construction": true,
+    "Repair": false,
+    "AIAssistant": false,
+    "ZatcaIntegrationKsa": false,
+    "IndiaGST": false,
+    "VCardNfc": false
 }

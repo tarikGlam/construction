@@ -135,7 +135,7 @@
                                 <li class="nav-item">
                                     <a class="nav-link" id="bugs-tab" data-toggle="tab" href="#Bugs" role="tab"
                                        aria-controls="Bugs" data-table="bugs"
-                                       aria-selected="false">{{__('db.Bug')}}</a>
+                                       aria-selected="false">Site Issues</a>
                                 </li>
 
                                 <li class="nav-item">
@@ -259,7 +259,7 @@
                                         <div class="col-md-12 mb-3">
                                             <span id="bugs_result"></span>
                                             <a class="btn btn-primary" data-toggle="collapse" href="#collapseBug" role="button" aria-expanded="false" aria-controls="collapseBug">
-                                                {{__('Report A Bug')}}
+                                                Report a Site Issue
                                             </a>
                                             <div class="collapse" id="collapseBug">
                                                 <hr>
@@ -267,7 +267,7 @@
                                                       enctype="multipart/form-data">
                                                     @csrf
                                                     <div class="form-group">
-                                                        <label>{{__('db.Bug')}}</label>
+                                                        <label>Site Issue</label>
                                                         <textarea required class="form-control" id="bugs_title" name="bugs_title" rows="3"></textarea>
                                                     </div>
 

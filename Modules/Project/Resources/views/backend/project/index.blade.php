@@ -63,9 +63,19 @@
                     <div class="row">
 
                         <div class="col-md-6 form-group">
-                            <label>{{__('db.Title')}} *</label>
+                            <label>Project Name *</label>
                             <input type="text" name="title" id="title" required class="form-control"
                                 placeholder="{{__('db.Title')}}">
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label>Project Code *</label>
+                            <input type="text" name="project_code" required class="form-control" placeholder="PRJ-001">
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label>Location</label>
+                            <input type="text" name="location" class="form-control">
                         </div>
 
                         <div class="col-md-6">
@@ -84,7 +94,7 @@
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{__('db.customer')}}*</label>
+                                <label>Client *</label>
                                 <select name="customer_id" id="customer_id"
                                     class="form-control selectpicker"
                                     data-live-search="true" data-live-search-style="contains"
@@ -95,6 +105,18 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div class="col-md-6 form-group">
+                            <label>Project Manager</label>
+                            <select name="project_manager_id" class="form-control selectpicker" data-live-search="true">
+                                <option value="">Select Project Manager</option>
+                                @foreach($employees as $employee)<option value="{{$employee->id}}">{{$employee->name}}</option>@endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-3 form-group"><label>Contract Value</label><input type="number" step=".0001" min="0" name="contract_value" class="form-control" value="0"></div>
+                        <div class="col-md-3 form-group"><label>Budget</label><input type="number" step=".0001" min="0" name="budget" class="form-control" value="0"></div>
+                        <div class="col-md-6 form-group"><label>Expected End Date</label><input type="date" name="expected_end_date" class="form-control"></div>
 
 
                         <div class="col-md-6 form-group">
@@ -204,11 +226,14 @@
                     <div class="row">
 
                         <div class="col-md-6 form-group">
-                            <label>{{__('db.Title')}} *</label>
+                            <label>Project Name *</label>
                             <input type="text" name="edit_title" id="edit_title" required
                                 class="form-control"
                                 placeholder="{{__('db.Title')}}">
                         </div>
+
+                        <div class="col-md-6 form-group"><label>Project Code *</label><input type="text" name="edit_project_code" id="edit_project_code" required class="form-control"></div>
+                        <div class="col-md-6 form-group"><label>Location</label><input type="text" name="edit_location" id="edit_location" class="form-control"></div>
 
                         <div class="col-md-6">
                             <div class="form-group">
@@ -226,7 +251,7 @@
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{__('db.customer')}}*</label>
+                                <label>Client *</label>
                                 <select name="edit_customer_id" id="edit_customer_id"
                                     class="form-control selectpicker"
                                     data-live-search="true" data-live-search-style="contains"
@@ -237,6 +262,11 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div class="col-md-6 form-group"><label>Project Manager</label><select name="edit_project_manager_id" id="edit_project_manager_id" class="form-control selectpicker" data-live-search="true"><option value="">Select Project Manager</option>@foreach($employees as $employee)<option value="{{$employee->id}}">{{$employee->name}}</option>@endforeach</select></div>
+                        <div class="col-md-3 form-group"><label>Contract Value</label><input type="number" step=".0001" min="0" name="edit_contract_value" id="edit_contract_value" class="form-control"></div>
+                        <div class="col-md-3 form-group"><label>Budget</label><input type="number" step=".0001" min="0" name="edit_budget" id="edit_budget" class="form-control"></div>
+                        <div class="col-md-6 form-group"><label>Expected End Date</label><input type="date" name="edit_expected_end_date" id="edit_expected_end_date" class="form-control"></div>
 
 
                         <div class="col-md-6 form-group">
@@ -605,6 +635,12 @@
                 success: function(html) {
 
                     $('#edit_title').val(html.data.title);
+                    $('#edit_project_code').val(html.data.project_code);
+                    $('#edit_location').val(html.data.location);
+                    $('#edit_project_manager_id').selectpicker('val', html.data.project_manager_id);
+                    $('#edit_contract_value').val(html.data.contract_value);
+                    $('#edit_budget').val(html.data.budget);
+                    $('#edit_expected_end_date').val(html.data.expected_end_date ? html.data.expected_end_date.substring(0, 10) : '');
                     $('#edit_project_priority').selectpicker('val', html.data.project_priority);
                     $('#edit_customer_id').selectpicker('val', html.data.customer_id);
 

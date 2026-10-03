@@ -102,7 +102,7 @@
                         @php
                             $role_has_permissions_list = $role_has_permissions_list ?? collect();
                         @endphp
-                        <div class="dropdown d-none d-lg-block">
+                        <div class="dropdown d-none">
 
                             <a class="btn-pos btn-sm" type="button" data-toggle="dropdown" aria-expanded="false">
                                 <i class="ti ti-plus"></i>
@@ -219,7 +219,7 @@
                         $language_setting_active = $role_has_permissions_list->where('name', 'language_setting')->first();
 
                         ?>
-                        @if ($sale_add_permission_active)
+                        @if (false && $sale_add_permission_active)
                             <li class="nav-item"><a class="btn-pos btn-sm" href="{{ route('sale.pos') }}"><i
                                         class="ti ti-shopping-bag"></i><span> POS</span></a></li>
                         @endif
@@ -236,7 +236,7 @@
                         @endif
                         <li class="nav-item d-none d-lg-block"><a id="btnFullscreen" data-toggle="tooltip"
                                 title="{{ __('Full Screen') }}"><i class="ti ti-arrows-maximize"></i></a></li>
-                        @if (optional(\Auth::user())->role_id <= 2)
+                        @if (false && optional(\Auth::user())->role_id <= 2)
                             <li class="nav-item d-none d-lg-block"><a href="{{ route('cashRegister.index') }}" data-toggle="tooltip"
                                     title="{{ __('Cash Register List') }}"><i class="ti ti-archive"></i></a></li>
                         @endif
@@ -347,10 +347,6 @@
         @include('backend.layout.modals.expense')
         @include('backend.layout.modals.income')
 
-        @include('backend.layout.modals.sale_return')
-
-        @include('backend.layout.modals.sale_exchange')
-
         @include('backend.layout.modals.purchase_return')
 
         @include('backend.layout.modals.account')
@@ -362,8 +358,6 @@
         @include('backend.layout.modals.warehouse')
 
         @include('backend.layout.modals.user')
-
-        @include('backend.layout.modals.biller')
 
         @include('backend.layout.modals.customer')
 

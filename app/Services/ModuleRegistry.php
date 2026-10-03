@@ -11,6 +11,25 @@ final class ModuleRegistry
      * module.*.access permission is an additional master role gate only.
      */
     public const MODULES = [
+        'construction' => [
+            'module_name' => 'Construction',
+            'label' => 'Construction ERP',
+            'group' => 'Core',
+            'description' => 'Project costing, material control, subcontractors, workforce, equipment and construction reporting.',
+            'access_permission' => 'module.construction.access',
+            'permissions' => [
+                'construction.dashboard.view' => 'View construction dashboard',
+                'construction.project-costs.manage' => 'Manage project costs',
+                'construction.material-issues.manage' => 'Manage material issues',
+                'construction.material-returns.manage' => 'Manage material returns',
+                'construction.subcontractors.manage' => 'Manage subcontractors and contracts',
+                'construction.project-wages.manage' => 'Manage project wages',
+                'construction.equipment.manage' => 'Manage equipment and assignments',
+                'construction.project-receipts.manage' => 'Manage project receipts',
+                'construction.reports.view' => 'View construction reports',
+            ],
+            'legacy_access' => 'admins',
+        ],
         'ecommerce' => [
             'module_name' => 'Ecommerce',
             'label' => 'eCommerce',

@@ -1,0 +1,4 @@
+<style>
+.construction-hero{background:linear-gradient(120deg,#17222d,#31586d);color:#fff;border-radius:12px;padding:24px;margin:18px 0}.construction-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}.construction-kpi{border:0;border-radius:10px;box-shadow:0 3px 14px rgba(26,42,55,.08)}.construction-kpi .value{font-size:1.5rem;font-weight:700;color:#1f4e63}.construction-form{background:#fff;border-radius:10px;padding:20px;box-shadow:0 3px 14px rgba(26,42,55,.07);margin-bottom:20px}.construction-table{background:#fff;border-radius:10px;padding:15px;box-shadow:0 3px 14px rgba(26,42,55,.07)}
+</style>
+<div class="construction-hero"><div class="d-flex justify-content-between align-items-center"><div><h2 class="mb-1">@yield('construction-title')</h2><div class="text-white-50">Construction Management ERP</div></div><i class="ti ti-building-skyscraper" style="font-size:42px"></i></div></div>

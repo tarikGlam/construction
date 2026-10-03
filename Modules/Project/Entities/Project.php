@@ -9,7 +9,15 @@ use App\Models\Employee;
 class Project extends Model
 {
 	protected $fillable = [
-		'title','customer_id','project_category_id','start_date','end_date','project_priority','description','summary','project_status','project_note','is_notify','added_by','project_progress'
+		'title','customer_id','project_category_id','start_date','end_date','project_priority','description','summary','project_status','project_note','is_notify','added_by','project_progress',
+		'project_code','location','project_manager_id','contract_value','budget','expected_end_date','actual_end_date'
+	];
+
+	protected $casts = [
+		'contract_value' => 'decimal:4',
+		'budget' => 'decimal:4',
+		'expected_end_date' => 'date',
+		'actual_end_date' => 'date',
 	];
 
 	public function category(){
@@ -23,6 +31,9 @@ class Project extends Model
 	}
 	public function assignedEmployees(){
 		return $this->belongsToMany(Employee::class, 'employee_project', 'project_id', 'employee_id');
+	}
+	public function projectManager(){
+		return $this->belongsTo(Employee::class, 'project_manager_id');
 	}
 
 	public function setStartDateAttribute($value)

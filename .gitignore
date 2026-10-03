@@ -23,3 +23,4 @@ npm-debug.log
 yarn-error.log
 /construction.zip
 /.git.salepro-history/
+/.phpunit.cache/

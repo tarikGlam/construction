@@ -1,0 +1,5 @@
+{
+    "name": "construction/construction",
+    "description": "Construction Management ERP module",
+    "autoload": {"psr-4": {"Modules\\Construction\\": ""}}
+}

@@ -38,6 +38,8 @@ class StockLedgerService
             ->concat($this->purchaseReturnMovements($filters))
             ->concat($this->transferMovements($filters))
             ->concat($this->adjustmentMovements($filters))
+            ->concat($this->materialIssueMovements($filters))
+            ->concat($this->materialReturnMovements($filters))
             ->concat($this->damageMovements($filters))
             ->concat($this->productionMovements($filters))
             ->sortBy(fn (array $row) => sprintf('%s-%020d-%s', $row['movement_at'], $row['source_id'], $row['source_type']))
@@ -331,6 +333,32 @@ class StockLedgerService
             }
         }
         return $result;
+    }
+
+    private function materialIssueMovements(array $f): Collection
+    {
+        if (!DB::connection()->getSchemaBuilder()->hasTable('material_issues')) return collect();
+        $q = DB::table('material_issue_items as line')->join('material_issues as h','line.material_issue_id','=','h.id')
+            ->join('products as p','line.product_id','=','p.id')->join('warehouses as w','h.warehouse_id','=','w.id')
+            ->leftJoin('categories as c','p.category_id','=','c.id')->leftJoin('brands as b','p.brand_id','=','b.id')
+            ->leftJoin('variants as v','line.variant_id','=','v.id')->leftJoin('product_batches as pb','line.product_batch_id','=','pb.id')
+            ->where('h.created_at','>=',$f['movement_from']);
+        $this->applyCommonQueryFilters($q,$f,'h.warehouse_id','line.product_id','p','line.variant_id','line.product_batch_id',null);
+        return $q->select(['h.id as source_id','h.reference_no','h.created_at as movement_at','h.warehouse_id','w.name as warehouse_name','line.product_id','p.name as product_name','p.code as product_code','c.name as category_name','b.title as brand_name','line.variant_id','v.name as variant_name','line.product_batch_id','pb.batch_no','line.quantity as source_qty','h.project_id'])
+            ->get()->map(fn($r)=>$this->movement($r,'material_issue',0,(float)$r->source_qty,'Project #'.$r->project_id));
+    }
+
+    private function materialReturnMovements(array $f): Collection
+    {
+        if (!DB::connection()->getSchemaBuilder()->hasTable('material_returns')) return collect();
+        $q = DB::table('material_return_items as line')->join('material_returns as h','line.material_return_id','=','h.id')
+            ->join('products as p','line.product_id','=','p.id')->join('warehouses as w','h.warehouse_id','=','w.id')
+            ->leftJoin('categories as c','p.category_id','=','c.id')->leftJoin('brands as b','p.brand_id','=','b.id')
+            ->leftJoin('variants as v','line.variant_id','=','v.id')->leftJoin('product_batches as pb','line.product_batch_id','=','pb.id')
+            ->where('h.created_at','>=',$f['movement_from']);
+        $this->applyCommonQueryFilters($q,$f,'h.warehouse_id','line.product_id','p','line.variant_id','line.product_batch_id',null);
+        return $q->select(['h.id as source_id','h.reference_no','h.created_at as movement_at','h.warehouse_id','w.name as warehouse_name','line.product_id','p.name as product_name','p.code as product_code','c.name as category_name','b.title as brand_name','line.variant_id','v.name as variant_name','line.product_batch_id','pb.batch_no','line.quantity as source_qty','h.project_id'])
+            ->get()->map(fn($r)=>$this->movement($r,'material_return',(float)$r->source_qty,0,'Project #'.$r->project_id));
     }
 
     private function adjustmentMovements(array $f): Collection

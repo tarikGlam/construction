@@ -1,0 +1,11 @@
+{
+    "name": "Construction",
+    "alias": "construction",
+    "description": "Construction Management ERP",
+    "keywords": ["construction", "projects", "materials"],
+    "priority": 10,
+    "providers": ["Modules\\Construction\\Providers\\ConstructionServiceProvider"],
+    "aliases": {},
+    "files": [],
+    "requires": ["Project"]
+}

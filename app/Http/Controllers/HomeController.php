@@ -49,16 +49,19 @@ class HomeController extends Controller
 
     public function home()
     {
-        return view('backend.home');
+        return redirect()->route('construction.dashboard');
     }
 
     public function index()
     {
-        return redirect('dashboard');
+        return redirect()->route('construction.dashboard');
     }
 
     public function dashboard()
     {
+        return redirect()->route('construction.dashboard');
+
+        /* Legacy retail dashboard retained below for engine compatibility. */
         if(in_array('restaurant',explode(',',cache()->get('general_setting')->modules))){
             if(Auth::user()->role_id > 2 && isset(Auth::user()->kitchen_id)){
 

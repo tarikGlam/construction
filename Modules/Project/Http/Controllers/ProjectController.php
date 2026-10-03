@@ -146,7 +146,7 @@ class ProjectController extends Controller {
 	{
 		// dd($request->all());
 		$validator = Validator::make($request->only('title', 'customer_id', 'employee_id', 'project_category_id', 'project_priority','project_status', 'description', 'start_date'
-			, 'end_date', 'summary'),
+			, 'end_date', 'summary', 'project_code', 'location', 'project_manager_id', 'contract_value', 'budget', 'expected_end_date'),
 			[
 				'title' => 'required',
 				'customer_id' => 'required',
@@ -155,6 +155,9 @@ class ProjectController extends Controller {
 				'project_status' => 'required',
 				'start_date' => 'required',
 				'end_date' => 'required|after_or_equal:start_date',
+				'project_code' => 'required|max:50|unique:projects,project_code',
+				'contract_value' => 'nullable|numeric|min:0',
+				'budget' => 'nullable|numeric|min:0',
 			]
 		);
 
@@ -177,6 +180,12 @@ class ProjectController extends Controller {
 		$data ['description'] = $request->description;
 		$data ['project_priority'] = $request->project_priority;
 		$data ['project_status'] = $request->project_status;
+		$data['project_code'] = $request->project_code;
+		$data['location'] = $request->location;
+		$data['project_manager_id'] = $request->project_manager_id;
+		$data['contract_value'] = $request->contract_value ?: 0;
+		$data['budget'] = $request->budget ?: 0;
+		$data['expected_end_date'] = $request->expected_end_date ?: null;
 
 
 		$project = Project::create($data);
@@ -268,7 +277,7 @@ class ProjectController extends Controller {
 		$id = $request->hidden_id;
 
 		$validator = Validator::make($request->only('edit_title', 'edit_customer_id', 'edit_project_category_id', 'edit_project_priority', 'edit_project_status', 'edit_description', 'edit_start_date'
-			, 'edit_end_date', 'edit_summary', 'edit_project_progress', 'edit_employee_id'),
+			, 'edit_end_date', 'edit_summary', 'edit_project_progress', 'edit_employee_id', 'edit_project_code', 'edit_location', 'edit_project_manager_id', 'edit_contract_value', 'edit_budget', 'edit_expected_end_date'),
 			[
 				'edit_title' => 'required',
 				'edit_customer_id' => 'required',
@@ -277,6 +286,9 @@ class ProjectController extends Controller {
 				'edit_project_status' => 'required',
 				'edit_start_date' => 'required',
 				'edit_end_date' => 'required',
+				'edit_project_code' => 'required|max:50|unique:projects,project_code,'.$id,
+				'edit_contract_value' => 'nullable|numeric|min:0',
+				'edit_budget' => 'nullable|numeric|min:0',
 			]
 		);
 
@@ -303,6 +315,12 @@ class ProjectController extends Controller {
 
 		$data ['project_priority'] = $request->edit_project_priority;
 		$data ['project_status'] = $request->edit_project_status;
+		$data['project_code'] = $request->edit_project_code;
+		$data['location'] = $request->edit_location;
+		$data['project_manager_id'] = $request->edit_project_manager_id;
+		$data['contract_value'] = $request->edit_contract_value ?: 0;
+		$data['budget'] = $request->edit_budget ?: 0;
+		$data['expected_end_date'] = $request->edit_expected_end_date ?: null;
 		if ($request->edit_project_progress)
 		{
 			$data ['project_progress'] = $request->edit_project_progress;
