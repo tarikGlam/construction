@@ -44,6 +44,13 @@ class TransferDomainService
             $data['item'] = count($data['product_id']);
         }
 
+        if (\Illuminate\Support\Facades\Schema::hasColumn('transfers', 'approved_by')) {
+            $status = (int) ($data['status'] ?? 2);
+            if ($status !== 2) $data['approved_by'] = $data['approved_by'] ?? $userId;
+            if (in_array($status, [1, 3], true)) $data['dispatch_date'] = $data['dispatch_date'] ?? date('Y-m-d');
+            if ($status === 1) $data['receipt_date'] = $data['receipt_date'] ?? date('Y-m-d');
+        }
+
         return DB::transaction(function () use ($data) {
 
             $lims_transfer_data = Transfer::create($data);

@@ -19,12 +19,14 @@ class MoneyTransferController extends Controller
     {
         $role = Role::find(Auth::user()->role_id);
         if($role->hasPermissionTo('money-transfer')){
-            $lims_money_transfer_all = MoneyTransfer::with(['fromAccount', 'toAccount', 'currency'])->get();
+            $lims_money_transfer_all = MoneyTransfer::with(['fromAccount', 'toAccount', 'currency', 'project', 'site'])->get();
             $lims_account_list = $this->paymentAccounts->validOperationalAccounts();
             if ($this->accountingMode->isDoubleEntryAuthoritative()) $this->paymentAccounts->decorate($lims_account_list);
             $currency_list = Currency::where('is_active', true)->get();
             $currency = $currency_list->firstWhere('exchange_rate', 1) ?? $currency_list->first();
-            return view('backend.money_transfer.index', compact('lims_money_transfer_all', 'lims_account_list', 'currency_list', 'currency'));
+            $construction_projects = class_exists(\Modules\Project\Entities\Project::class) ? \Modules\Project\Entities\Project::orderBy('title')->get(['id','title']) : collect();
+            $construction_sites = class_exists(\Modules\Construction\Entities\ConstructionSite::class) ? \Modules\Construction\Entities\ConstructionSite::with('project')->orderBy('name')->get() : collect();
+            return view('backend.money_transfer.index', compact('lims_money_transfer_all', 'lims_account_list', 'currency_list', 'currency', 'construction_projects', 'construction_sites'));
         }
         else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
@@ -44,6 +46,9 @@ class MoneyTransferController extends Controller
         // === ACCOUNTING ENGINE PHASE 2E: TRANSFER ===
         $accountingService = app(\App\Services\AccountingService::class);
         $result = $accountingService->recordMoneyTransfer($transfer, 'money_transfer_created');
+        if ($result->success && $result->journalEntry && $transfer->project_id) {
+            $this->stampConstructionDimensions($result->journalEntry->id, $transfer);
+        }
         if (!$result->success) {
             \Log::error('Accounting failed for Money Transfer', ['transfer_id' => $transfer->id, 'error' => $result->error]);
             if (\Schema::hasColumn($transfer->getTable(), 'accounting_status')) {
@@ -66,6 +71,9 @@ class MoneyTransferController extends Controller
         $accountingService = app(\App\Services\AccountingService::class);
         $accountingService->reverseTransaction(get_class($transfer), $transfer->id, '_reversed');
         $result = $accountingService->recordMoneyTransfer($transfer, 'money_transfer_updated');
+        if ($result->success && $result->journalEntry && $transfer->project_id) {
+            $this->stampConstructionDimensions($result->journalEntry->id, $transfer);
+        }
         if (!$result->success) {
             \Log::error('Accounting failed for Money Transfer Update', ['transfer_id' => $transfer->id, 'error' => $result->error]);
             if (\Schema::hasColumn($transfer->getTable(), 'accounting_status')) {
@@ -87,6 +95,9 @@ class MoneyTransferController extends Controller
             'currency_id' => ['required', 'integer', 'exists:currencies,id'],
             'exchange_rate' => ['required', 'numeric', 'gt:0'],
             'note' => ['nullable', 'string', 'max:1000'],
+            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+            'site_id' => ['nullable', 'integer', 'exists:construction_sites,id'],
+            'external_reference' => ['nullable', 'string', 'max:191'],
             'created_at' => [$id ? 'nullable' : 'sometimes', 'string', 'max:50'],
         ]);
 
@@ -114,4 +125,15 @@ class MoneyTransferController extends Controller
         $transfer->delete();
         return redirect()->back()->with('not_permitted', __('db.Data deleted successfully'));
     }
+
+    private function stampConstructionDimensions(int $journalEntryId, MoneyTransfer $transfer): void
+    {
+        if (!\Schema::hasColumn('journal_lines', 'project_id')) return;
+        \DB::table('journal_lines')->where('journal_entry_id', $journalEntryId)->update([
+            'project_id' => $transfer->project_id,
+            'site_id' => $transfer->site_id,
+            'cost_category_id' => null,
+        ]);
+    }
+
 }

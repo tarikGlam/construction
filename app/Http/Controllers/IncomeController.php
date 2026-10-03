@@ -47,6 +47,7 @@ class IncomeController extends Controller
                 $warehouse_id = $request->input('warehouse_id');
             else
                 $warehouse_id = 0;
+            $project_id = $request->input('project_id') ?: 0;
 
             if($request->input('income_category_id'))
                 $income_category_id = $request->input('income_category_id');
@@ -57,7 +58,10 @@ class IncomeController extends Controller
 
             $lims_warehouse_list = Warehouse::select('name', 'id')->where('is_active', true)->get();
             $lims_account_list = app(\App\Services\PaymentAccountService::class)->validOperationalAccounts();
-            return view('backend.income.index', compact('lims_account_list', 'lims_warehouse_list', 'income_category_list', 'all_permission', 'starting_date', 'ending_date', 'warehouse_id','income_category_id'));
+            $construction_projects = class_exists(\Modules\Project\Entities\Project::class) ? \Modules\Project\Entities\Project::orderBy('title')->get(['id','title']) : collect();
+            $construction_sites = class_exists(\Modules\Construction\Entities\ConstructionSite::class) ? \Modules\Construction\Entities\ConstructionSite::with('project')->orderBy('name')->get() : collect();
+            $construction_cost_categories = \Schema::hasTable('cost_categories') ? DB::table('cost_categories')->where('active',true)->orderBy('name')->get() : collect();
+            return view('backend.income.index', compact('lims_account_list', 'lims_warehouse_list', 'income_category_list', 'all_permission', 'starting_date', 'ending_date', 'warehouse_id','income_category_id','construction_projects','construction_sites','construction_cost_categories'));
         }
         else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
@@ -71,12 +75,15 @@ class IncomeController extends Controller
         );
 
         $warehouse_id = $request->input('warehouse_id');
+        $project_id = $request->input('project_id');
         $q = Income::whereDate('created_at', '>=' ,$request->input('starting_date'))
                      ->whereDate('created_at', '<=' ,$request->input('ending_date'));
         //check staff access
         $this->staffAccessCheck($q);
         if($warehouse_id)
             $q = $q->where('warehouse_id', $warehouse_id);
+        if($project_id)
+            $q = $q->where('project_id', $project_id);
 
         $totalData = $q->count();
         $totalFiltered = $totalData;
@@ -89,7 +96,7 @@ class IncomeController extends Controller
         $order = 'incomes.'.$columns[$request->input('order.0.column')];
         $dir = $request->input('order.0.dir');
         if(empty($request->input('search.value'))) {
-            $q = Income::with('warehouse', 'incomeCategory')
+            $q = Income::with('warehouse', 'incomeCategory', 'project', 'site')
                 ->whereDate('created_at', '>=' ,$request->input('starting_date'))
                 ->whereDate('created_at', '<=' ,$request->input('ending_date'))
                 ->offset($start)
@@ -99,6 +106,8 @@ class IncomeController extends Controller
             $this->staffAccessCheck($q);
             if($warehouse_id)
                 $q = $q->where('warehouse_id', $warehouse_id);
+            if($project_id)
+                $q = $q->where('project_id', $project_id);
             $incomes = $q->get();
         }
         else
@@ -110,7 +119,7 @@ class IncomeController extends Controller
                 ->orderBy($order,$dir);
             if(Auth::user()->role_id > 2 && config('staff_access') == 'own') {
                 $incomes =  $q->select('incomes.*')
-                                ->with('warehouse', 'incomeCategory')
+                                ->with('warehouse', 'incomeCategory', 'project', 'site')
                                 ->where('incomes.user_id', Auth::id())
                                 ->orwhere([
                                     ['reference_no', 'LIKE', "%{$search}%"],
@@ -121,7 +130,7 @@ class IncomeController extends Controller
             }
             elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse') {
                 $incomes =  $q->select('incomes.*')
-                                ->with('warehouse', 'incomeCategory')
+                                ->with('warehouse', 'incomeCategory', 'project', 'site')
                                 ->where('incomes.user_id', Auth::id())
                                 ->orwhere([
                                     ['reference_no', 'LIKE', "%{$search}%"],
@@ -132,7 +141,7 @@ class IncomeController extends Controller
             }
             else {
                 $incomes =  $q->select('incomes.*')
-                                ->with('warehouse', 'incomeCategory')
+                                ->with('warehouse', 'incomeCategory', 'project', 'site')
                                 ->orwhere('reference_no', 'LIKE', "%{$search}%")
                                 ->get();
 
@@ -150,6 +159,8 @@ class IncomeController extends Controller
                 $nestedData['reference_no'] = $income->reference_no;
                 $nestedData['warehouse'] = $income->warehouse->name;
                 $nestedData['incomeCategory'] = $income->incomeCategory->name;
+                $nestedData['project'] = $income->project?->title ?: '—';
+                $nestedData['site'] = $income->site?->name ?: '—';
                 $nestedData['amount'] = number_format($income->amount, config('decimal'));
                 $nestedData['note'] = $income->note;
                 $nestedData['options'] = '<div class="btn-group">
@@ -215,6 +226,7 @@ class IncomeController extends Controller
             throw new \RuntimeException($accountingResult->getMessage() ?: 'Income accounting posting failed.');
         } elseif ($accountingResult->isPosted()) {
             $income->update(['accounting_status' => 'posted']);
+            $this->stampConstructionDimensions($accountingResult->journalEntry?->id, $income);
         }
 
         DB::commit();
@@ -270,6 +282,7 @@ class IncomeController extends Controller
             throw new \RuntimeException($accountingResult->getMessage() ?: 'Income accounting posting failed.');
         } elseif ($accountingResult->isPosted()) {
             $income->update(['accounting_status' => 'posted']);
+            $this->stampConstructionDimensions($accountingResult->journalEntry?->id, $income);
         }
 
         DB::commit();
@@ -322,4 +335,15 @@ class IncomeController extends Controller
             return redirect()->back()->with('not_permitted', 'Income deletion failed: ' . $e->getMessage());
         }
     }
+
+    private function stampConstructionDimensions(?int $journalEntryId, Income $income): void
+    {
+        if (!$journalEntryId || !\Schema::hasColumn('journal_lines', 'project_id') || !$income->project_id) return;
+        DB::table('journal_lines')->where('journal_entry_id', $journalEntryId)->update([
+            'project_id' => $income->project_id,
+            'site_id' => $income->site_id,
+            'cost_category_id' => $income->cost_category_id,
+        ]);
+    }
+
 }

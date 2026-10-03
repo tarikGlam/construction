@@ -1305,6 +1305,10 @@ class CustomerController extends Controller
 
         return DB::transaction(function () use ($validated) {
             $deposit = Deposit::findOrFail($validated['deposit_id']);
+            if (class_exists(\Modules\Construction\Entities\ProjectReceipt::class)
+                && \Modules\Construction\Entities\ProjectReceipt::where('deposit_id', $deposit->id)->exists()) {
+                throw new \App\Exceptions\SaleValidationException('This deposit is linked to a Construction Project Receipt and must be managed from Project Receipts.');
+            }
             $isDoubleEntry = app(\App\Services\AccountingModeService::class)->isDoubleEntryAuthoritative();
 
             if ($isDoubleEntry && $deposit->deposit_type === null) {
@@ -1383,6 +1387,10 @@ class CustomerController extends Controller
 
         return DB::transaction(function () use ($validated) {
             $deposit = Deposit::findOrFail($validated['id']);
+            if (class_exists(\Modules\Construction\Entities\ProjectReceipt::class)
+                && \Modules\Construction\Entities\ProjectReceipt::where('deposit_id', $deposit->id)->exists()) {
+                throw new \App\Exceptions\SaleValidationException('This deposit is linked to a Construction Project Receipt and must be managed from Project Receipts.');
+            }
             $isDoubleEntry = app(\App\Services\AccountingModeService::class)->isDoubleEntryAuthoritative();
 
             if ($isDoubleEntry && $deposit->deposit_type === null) {

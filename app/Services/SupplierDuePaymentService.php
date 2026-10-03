@@ -296,7 +296,7 @@ class SupplierDuePaymentService
         return $query->get();
     }
 
-    private function dueForPurchase(Purchase $purchase): float
+    public function dueForPurchase(Purchase $purchase): float
     {
         $paid = (float) DB::table('payments')
             ->where('purchase_id', $purchase->id)

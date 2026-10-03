@@ -16,6 +16,9 @@ class MoneyTransfer extends Model
         'exchange_rate',
         'note',
         'created_at',
+        'project_id',
+        'site_id',
+        'external_reference',
     ];
 
     public function fromAccount()
@@ -32,4 +35,7 @@ class MoneyTransfer extends Model
     {
         return $this->belongsTo('App\Models\Currency');
     }
+
+    public function project() { return $this->belongsTo(\Modules\Project\Entities\Project::class); }
+    public function site() { return $this->belongsTo(\Modules\Construction\Entities\ConstructionSite::class, 'site_id'); }
 }

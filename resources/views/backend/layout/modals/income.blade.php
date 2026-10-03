@@ -55,6 +55,12 @@
                                 <label>{{ __('Amount') }} *</label>
                                 <input type="number" name="amount" step="any" required class="form-control">
                             </div>
+
+                            @if(\Schema::hasColumn('incomes','project_id'))
+                            <div class="col-md-6 form-group"><label>Construction Project</label><select name="project_id" class="selectpicker form-control" data-live-search="true"><option value="">None / General</option>@foreach($construction_projects ?? collect() as $project)<option value="{{$project->id}}">{{$project->title}}</option>@endforeach</select></div>
+                            <div class="col-md-6 form-group"><label>Site</label><select name="site_id" class="selectpicker form-control" data-live-search="true"><option value="">None</option>@foreach($construction_sites ?? collect() as $site)<option value="{{$site->id}}">{{$site->name}}</option>@endforeach</select></div>
+                            <div class="col-md-6 form-group"><label>Project Cost / Revenue Category</label><select name="cost_category_id" class="selectpicker form-control" data-live-search="true"><option value="">None</option>@foreach($construction_cost_categories ?? collect() as $category)<option value="{{$category->id}}">{{$category->name}}</option>@endforeach</select></div>
+                            @endif
                             <div class="col-md-6 form-group">
                                 <label> {{ __('Account') }}</label>
                                 <select class="form-control selectpicker" name="account_id">

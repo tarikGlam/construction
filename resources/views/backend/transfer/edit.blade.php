@@ -83,6 +83,12 @@
                                         </div>
                                     </div>
                                 </div>
+                                    @if(isset($construction_projects) && $construction_projects->isNotEmpty())
+                                    <div class="col-md-4"><div class="form-group"><label>Construction Project</label><select name="project_id" class="selectpicker form-control" data-live-search="true"><option value="">General transfer</option>@foreach($construction_projects as $project)<option value="{{$project->id}}" @selected((int)$lims_transfer_data->project_id === (int)$project->id)>{{$project->project_code}} {{$project->title}}</option>@endforeach</select></div></div>
+                                    <div class="col-md-4"><div class="form-group"><label>Project Site</label><select name="site_id" class="selectpicker form-control" data-live-search="true"><option value="">No specific site</option>@foreach($construction_sites as $site)<option value="{{$site->id}}" @selected((int)$lims_transfer_data->site_id === (int)$site->id)>{{$site->project?->title}} - {{$site->name}}</option>@endforeach</select></div></div>
+                                    <div class="col-md-2"><div class="form-group"><label>Dispatch Date</label><input type="date" name="dispatch_date" value="{{$lims_transfer_data->dispatch_date}}" class="form-control"></div></div>
+                                    <div class="col-md-2"><div class="form-group"><label>Receipt Date</label><input type="date" name="receipt_date" value="{{$lims_transfer_data->receipt_date}}" class="form-control"></div></div>
+                                    @endif
                                 <div class="row mt-3">
                                     <div class="col-md-12">
                                         <label>{{__('db.Select Product')}}</label>

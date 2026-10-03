@@ -23,6 +23,8 @@ class StorePurchaseRequest extends FormRequest
     {
         return [
             'warehouse_id' => 'required|exists:warehouses,id',
+            'project_id' => 'nullable|exists:projects,id',
+            'site_id' => 'nullable|exists:construction_sites,id',
             'currency_id' => 'required|exists:currencies,id,is_active,1',
             'exchange_rate' => ['required', new \App\Rules\ValidTransactionExchangeRate()],
             'product_code' => 'required|array',

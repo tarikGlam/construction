@@ -47,6 +47,9 @@ class Purchase extends Model
         return $this->belongsTo(Currency::class);
     }
 
+    public function project() { return $this->belongsTo(\Modules\Project\Entities\Project::class); }
+    public function site() { return $this->belongsTo(\Modules\Construction\Entities\ConstructionSite::class, 'site_id'); }
+
     public function returns()
     {
         return $this->hasMany(ReturnPurchase::class,'purchase_id');

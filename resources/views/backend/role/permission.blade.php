@@ -8,7 +8,8 @@
             'construction.project-costs.manage' => 'Manage Project Costs', 'construction.material-issues.manage' => 'Create / View Material Issues',
             'construction.material-returns.manage' => 'Create Material Returns', 'construction.subcontractors.manage' => 'Manage Subcontractors & Contracts',
             'construction.project-wages.manage' => 'Manage Project Wages', 'construction.equipment.manage' => 'Manage Equipment & Assignments',
-            'construction.project-receipts.manage' => 'Manage Project Receipts', 'construction.reports.view' => 'View Project Reports',
+            'construction.project-receipts.manage' => 'Manage Project Receipts', 'construction.shareholders.manage' => 'Manage Shareholders & Transactions', 'construction.procurement.view' => 'View Project Procurement & Logistics',
+            'construction.transport.manage' => 'Manage Transport Records', 'construction.supplier-items.manage' => 'Manage Supplier-Item Relationships', 'construction.reports.view' => 'View Project Reports',
         ],
         'Procurement & Stores' => [
             'purchases-index'=>'View Purchases','purchases-add'=>'Create Purchases','purchases-edit'=>'Edit Purchases','purchase-return-index'=>'View Purchase Returns',

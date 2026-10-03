@@ -72,6 +72,10 @@
                                     </select>
                                 </div>
                             </div>
+                            @if(isset($construction_projects) && $construction_projects->isNotEmpty())
+                            <div class="col-md-4"><div class="form-group"><label>Construction Project</label><select name="project_id" class="selectpicker form-control" data-live-search="true"><option value="">General / Not project-specific</option>@foreach($construction_projects as $project)<option value="{{$project->id}}" @selected((int)$lims_purchase_data->project_id === (int)$project->id)>{{$project->project_code}} {{$project->title}}</option>@endforeach</select></div></div>
+                            <div class="col-md-4"><div class="form-group"><label>Project Site</label><select name="site_id" class="selectpicker form-control" data-live-search="true"><option value="">No specific site</option>@foreach($construction_sites as $site)<option value="{{$site->id}}" @selected((int)$lims_purchase_data->site_id === (int)$site->id)>{{$site->project?->title}} - {{$site->name}}</option>@endforeach</select></div></div>
+                            @endif
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>{{__('db.Purchase Status')}}</label>

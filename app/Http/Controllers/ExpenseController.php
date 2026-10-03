@@ -293,6 +293,9 @@ class ExpenseController extends Controller
         $role = Role::firstOrCreate(['id' => Auth::user()->role_id]);
         if ($role->hasPermissionTo('expenses-edit')) {
             $lims_expense_data = Expense::find($id);
+            if ($lims_expense_data && $this->isConstructionLinkedExpense((int) $lims_expense_data->id)) {
+                return redirect()->back()->with('not_permitted', 'This Expense is linked to a Construction transaction and must be managed from Construction ERP.');
+            }
             $lims_expense_data->date = date('d-m-Y', strtotime($lims_expense_data->created_at->toDateString()));
             return $lims_expense_data;
         }
@@ -309,6 +312,10 @@ class ExpenseController extends Controller
         $data = $request->all();
         $this->validateAdvanceRequest($request);
         $lims_expense_data = Expense::find($data['expense_id']);
+        if (!$lims_expense_data) {
+            throw new \RuntimeException('Expense not found.');
+        }
+        $this->assertExpenseNotConstructionLinked((int) $lims_expense_data->id);
         $document = $request->document;
         if ($document) {
             $v = Validator::make(
@@ -409,6 +416,7 @@ class ExpenseController extends Controller
             foreach ($expense_id as $id) {
                 $expense = Expense::find($id);
                 if (!$expense) continue;
+                $this->assertExpenseNotConstructionLinked((int) $expense->id);
                 $reversal = $this->accountingService->reverseTransaction(get_class($expense), $expense->id);
                 if (!$reversal->isSuccess()) {
                     throw new \RuntimeException($reversal->getMessage() ?? 'Expense accounting entry could not be reversed.');
@@ -435,6 +443,7 @@ class ExpenseController extends Controller
             DB::rollBack();
             return redirect('expenses');
         }
+        $this->assertExpenseNotConstructionLinked((int) $expense->id);
         $reversal = $this->accountingService->reverseTransaction(get_class($expense), $expense->id);
         if (!$reversal->isSuccess()) {
             throw new \RuntimeException($reversal->getMessage() ?? 'Expense accounting entry could not be reversed.');
@@ -448,6 +457,29 @@ class ExpenseController extends Controller
             DB::rollBack();
             \Log::error('Expense deletion failed: ' . $e->getMessage());
             return redirect()->back()->with('not_permitted', 'Expense could not be deleted: ' . $e->getMessage());
+        }
+    }
+
+    private function isConstructionLinkedExpense(int $expenseId): bool
+    {
+        $projectCost = class_exists(\Modules\Construction\Entities\ProjectCost::class)
+            && \Modules\Construction\Entities\ProjectCost::where('expense_id', $expenseId)->exists();
+        $subcontractPayment = class_exists(\Modules\Construction\Entities\SubcontractorPayment::class)
+            && \Modules\Construction\Entities\SubcontractorPayment::where('expense_id', $expenseId)->exists();
+        $employeeExpense = class_exists(\Modules\Construction\Entities\EmployeeProjectExpense::class)
+            && \Modules\Construction\Entities\EmployeeProjectExpense::where('expense_id', $expenseId)->exists();
+        $employeeAdvance = class_exists(\Modules\Construction\Entities\EmployeeAdvance::class)
+            && \Modules\Construction\Entities\EmployeeAdvance::where('expense_id', $expenseId)->exists();
+        $advanceSettlement = class_exists(\Modules\Construction\Entities\EmployeeAdvanceSettlement::class)
+            && \Modules\Construction\Entities\EmployeeAdvanceSettlement::where('expense_id', $expenseId)->exists();
+
+        return $projectCost || $subcontractPayment || $employeeExpense || $employeeAdvance || $advanceSettlement;
+    }
+
+    private function assertExpenseNotConstructionLinked(int $expenseId): void
+    {
+        if ($this->isConstructionLinkedExpense($expenseId)) {
+            throw new \RuntimeException('This Expense is linked to a Construction transaction and must be managed from Construction ERP.');
         }
     }
 

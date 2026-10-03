@@ -128,8 +128,10 @@ class PurchaseController extends Controller
 
             $custom_fields = CustomField::where('belongs_to', 'purchase')->get();
             $lims_account_list = app(\App\Services\PaymentAccountService::class)->validOperationalAccounts();
+            $construction_projects = class_exists(\Modules\Project\Entities\Project::class) ? \Modules\Project\Entities\Project::orderBy('title')->get() : collect();
+            $construction_sites = class_exists(\Modules\Construction\Entities\ConstructionSite::class) ? \Modules\Construction\Entities\ConstructionSite::with('project')->orderBy('name')->get() : collect();
 
-            return view('backend.purchase.create', compact('lims_supplier_list', 'lims_warehouse_list', 'lims_tax_list', 'lims_product_list_without_variant', 'lims_product_list_with_variant', 'currency_list', 'custom_fields', 'lims_account_list'));
+            return view('backend.purchase.create', compact('lims_supplier_list', 'lims_warehouse_list', 'lims_tax_list', 'lims_product_list_without_variant', 'lims_product_list_with_variant', 'currency_list', 'custom_fields', 'lims_account_list', 'construction_projects', 'construction_sites'));
         } else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
     }
@@ -1325,7 +1327,9 @@ class PurchaseController extends Controller
             $currency_exchange_rate = $lims_purchase_data->exchange_rate ?? 1;
 
             $custom_fields = CustomField::where('belongs_to', 'purchase')->get();
-            return view('backend.purchase.edit', compact('lims_warehouse_list', 'lims_supplier_list', 'lims_product_list_without_variant', 'lims_product_list_with_variant', 'lims_tax_list', 'lims_purchase_data', 'lims_product_purchase_data', 'currency_list', 'currency_exchange_rate', 'custom_fields'));
+            $construction_projects = class_exists(\Modules\Project\Entities\Project::class) ? \Modules\Project\Entities\Project::orderBy('title')->get() : collect();
+            $construction_sites = class_exists(\Modules\Construction\Entities\ConstructionSite::class) ? \Modules\Construction\Entities\ConstructionSite::with('project')->orderBy('name')->get() : collect();
+            return view('backend.purchase.edit', compact('lims_warehouse_list', 'lims_supplier_list', 'lims_product_list_without_variant', 'lims_product_list_with_variant', 'lims_tax_list', 'lims_purchase_data', 'lims_product_purchase_data', 'currency_list', 'currency_exchange_rate', 'custom_fields', 'construction_projects', 'construction_sites'));
         } else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
     }

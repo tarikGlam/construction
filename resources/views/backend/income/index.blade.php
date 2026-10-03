@@ -63,6 +63,7 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="col-md-3 mt-3"><div class="form-group top-fields"><label>Project</label><select id="project_id" name="project_id" class="selectpicker form-control" data-live-search="true"><option value="">All projects</option>@foreach($construction_projects as $project)<option value="{{$project->id}}" @selected(request('project_id')==$project->id)>{{$project->title}}</option>@endforeach</select></div></div>
                         <div id="filter-loading" class="col-12 text-center my-2" style="display:none;">
                             <span class="spinner-border text-primary spinner-border-sm" role="status"></span>
                             <span>Loading results...</span>
@@ -80,22 +81,15 @@
                     <th>{{__('db.date')}}</th>
                     <th>{{__('db.reference')}} No</th>
                     <th>{{__('db.Warehouse')}}</th>
-                    <th>{{__('db.category')}}</th>
+                    <th>{{__('db.category')}}</th><th>Project</th><th>Site</th>
                     <th>{{__('db.Amount')}}</th>
                     <th>{{__('db.note')}}</th>
                     <th class="not-exported">{{__('db.action')}}</th>
                 </tr>
             </thead>
-            <tfoot class="tfoot active">
-                <th></th>
-                <th>{{__('db.Total')}}</th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tfoot>
+            <tfoot class="tfoot active"><tr>
+                <th></th><th>{{__('db.Total')}}</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+            </tr>
         </table>
     </div>
 </section>
@@ -152,6 +146,11 @@
                             <label>{{__('db.Amount')}} *</label>
                             <input type="number" name="amount" step="any" required class="form-control">
                         </div>
+                        @if(\Schema::hasColumn('incomes','project_id'))
+                        <div class="col-md-6 form-group"><label>Construction Project</label><select name="project_id" class="selectpicker form-control"><option value="">None / General</option>@foreach($construction_projects as $project)<option value="{{$project->id}}">{{$project->title}}</option>@endforeach</select></div>
+                        <div class="col-md-6 form-group"><label>Site</label><select name="site_id" class="selectpicker form-control"><option value="">None</option>@foreach($construction_sites as $site)<option value="{{$site->id}}">{{$site->name}}</option>@endforeach</select></div>
+                        <div class="col-md-6 form-group"><label>Project Cost / Revenue Category</label><select name="cost_category_id" class="selectpicker form-control"><option value="">None</option>@foreach($construction_cost_categories as $category)<option value="{{$category->id}}">{{$category->name}}</option>@endforeach</select></div>
+                        @endif
                         <div class="col-md-6 form-group">
                             <label> {{__('db.Account')}}</label>
                             <select class="form-control selectpicker" name="account_id">
@@ -214,6 +213,9 @@
                 $("#editModal select[name='warehouse_id']").val(data['warehouse_id']);
                 $("#editModal select[name='income_category_id']").val(data['income_category_id']);
                 $("#editModal select[name='account_id']").val(data['account_id']);
+                $("#editModal select[name='project_id']").val(data['project_id']);
+                $("#editModal select[name='site_id']").val(data['site_id']);
+                $("#editModal select[name='cost_category_id']").val(data['cost_category_id']);
                 $("#editModal input[name='amount']").val(data['amount']);
                 $("#editModal input[name='income_id']").val(data['id']);
                 $("#editModal textarea[name='note']").val(data['note']);
@@ -238,6 +240,7 @@
                 d.starting_date  = $("input[name=starting_date]").val();
                 d.ending_date    = $("input[name=ending_date]").val();
                 d.warehouse_id   = $("#warehouse_id").val();
+                d.project_id     = $("#project_id").val();
             },
             dataType: "json"
         },
@@ -250,6 +253,8 @@
             {"data": "reference_no"},
             {"data": "warehouse"},
             {"data": "incomeCategory"},
+            {"data": "project"},
+            {"data": "site"},
             {"data": "amount"},
             {"data": "note"},
             {"data": "options"}
@@ -268,7 +273,7 @@
         'columnDefs': [
             {
                 "orderable": false,
-                'targets': [0, 3, 4, 6, 7]
+                'targets': [0, 3, 4, 5, 6, 8, 9]
             },
             {
                 'render': function(data, type, row, meta){
@@ -398,10 +403,11 @@
     function datatable_sum(dt_selector, is_calling_first) {
         if (dt_selector.rows( '.selected' ).any() && is_calling_first) {
             var rows = dt_selector.rows( '.selected' ).indexes();
-            $( dt_selector.column( 5 ).footer() ).html(dt_selector.cells( rows, 5, { page: 'current' } ).data().sum().toFixed({{gen_setting()->decimal}}));
+            $( dt_selector.column( 7 ).footer() ).html(dt_selector.cells( rows, 7, { page: 'current' } ).data().sum().toFixed({{gen_setting()->decimal}}));
         }
         else {
-            $( dt_selector.column( 5 ).footer() ).html(dt_selector.cells( rows, 5, { page: 'current' } ).data().sum().toFixed({{gen_setting()->decimal}}));
+            var rows = dt_selector.rows({ page: 'current' }).indexes();
+            $( dt_selector.column( 7 ).footer() ).html(dt_selector.cells( rows, 7, { page: 'current' } ).data().sum().toFixed({{gen_setting()->decimal}}));
         }
     }
 

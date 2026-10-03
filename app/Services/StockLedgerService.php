@@ -342,9 +342,10 @@ class StockLedgerService
             ->join('products as p','line.product_id','=','p.id')->join('warehouses as w','h.warehouse_id','=','w.id')
             ->leftJoin('categories as c','p.category_id','=','c.id')->leftJoin('brands as b','p.brand_id','=','b.id')
             ->leftJoin('variants as v','line.variant_id','=','v.id')->leftJoin('product_batches as pb','line.product_batch_id','=','pb.id')
-            ->where('h.created_at','>=',$f['movement_from']);
+            ->where('h.status','issued')
+            ->whereRaw('COALESCE(h.approved_at, h.created_at) >= ?', [$f['movement_from']]);
         $this->applyCommonQueryFilters($q,$f,'h.warehouse_id','line.product_id','p','line.variant_id','line.product_batch_id',null);
-        return $q->select(['h.id as source_id','h.reference_no','h.created_at as movement_at','h.warehouse_id','w.name as warehouse_name','line.product_id','p.name as product_name','p.code as product_code','c.name as category_name','b.title as brand_name','line.variant_id','v.name as variant_name','line.product_batch_id','pb.batch_no','line.quantity as source_qty','h.project_id'])
+        return $q->select(['h.id as source_id','h.reference_no',DB::raw('COALESCE(h.approved_at, h.created_at) as movement_at'),'h.warehouse_id','w.name as warehouse_name','line.product_id','p.name as product_name','p.code as product_code','c.name as category_name','b.title as brand_name','line.variant_id','v.name as variant_name','line.product_batch_id','pb.batch_no','line.quantity as source_qty','h.project_id'])
             ->get()->map(fn($r)=>$this->movement($r,'material_issue',0,(float)$r->source_qty,'Project #'.$r->project_id));
     }
 

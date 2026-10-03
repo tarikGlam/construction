@@ -32,6 +32,7 @@
                     <th>{{__('db.Amount')}}</th>
                     <th>{{__('db.Currency')}}</th>
                     <th>{{__('db.Exchange Rate')}}</th>
+                    <th>Project</th><th>Site</th><th>External Reference</th>
                     <th>{{__('db.note')}}</th>
                     <th class="not-exported">{{__('db.action')}}</th>
                 </tr>
@@ -47,6 +48,7 @@
                     <td>{{ number_format((float)$money_transfer->amount, gen_setting()->decimal, '.', '')}}</td>
                     <td>{{ optional($money_transfer->currency)->code ?? 'N/A' }}</td>
                     <td>{{ number_format((float)($money_transfer->exchange_rate ?? 1), gen_setting()->decimal, '.', '') }}</td>
+                    <td>{{ $money_transfer->project?->title ?: '—' }}</td><td>{{ $money_transfer->site?->name ?: '—' }}</td><td>{{ $money_transfer->external_reference ?: '—' }}</td>
                     <td>{{ $money_transfer->note }}</td>
                     <td>
                         <div class="btn-group">
@@ -55,7 +57,7 @@
                                 <span class="sr-only">Toggle Dropdown</span>
                             </button>
                             <ul class="dropdown-menu edit-options dropdown-menu-right dropdown-default" user="menu">
-                                <li><button type="button" id="edit-btn" data-id="{{$money_transfer->id}}" data-created_at="{{date(config('date_format'), strtotime($money_transfer->created_at->toDateString()))}}" data-from_id="{{$money_transfer->from_account_id}}" data-to_id="{{$money_transfer->to_account_id}}" data-amount="{{$money_transfer->amount}}" data-currency_id="{{$money_transfer->currency_id}}" data-exchange_rate="{{$money_transfer->exchange_rate ?? 1}}" data-note="{{$money_transfer->note}}" class=" btn btn-link" data-toggle="modal" data-target="#edit-money-transfer-modal"><i class="ti ti-edit"></i> {{__('db.edit')}}</button></li>
+                                <li><button type="button" id="edit-btn" data-id="{{$money_transfer->id}}" data-created_at="{{date(config('date_format'), strtotime($money_transfer->created_at->toDateString()))}}" data-from_id="{{$money_transfer->from_account_id}}" data-to_id="{{$money_transfer->to_account_id}}" data-amount="{{$money_transfer->amount}}" data-currency_id="{{$money_transfer->currency_id}}" data-exchange_rate="{{$money_transfer->exchange_rate ?? 1}}" data-project_id="{{$money_transfer->project_id}}" data-site_id="{{$money_transfer->site_id}}" data-external_reference="{{$money_transfer->external_reference}}" data-note="{{$money_transfer->note}}" class=" btn btn-link" data-toggle="modal" data-target="#edit-money-transfer-modal"><i class="ti ti-edit"></i> {{__('db.edit')}}</button></li>
                                 <li class="divider"></li>
                                 <form action="{{ route('money-transfers.destroy', $money_transfer->id) }}" method="POST">
                                     @csrf
@@ -70,18 +72,9 @@
                 </tr>
                 @endforeach
             </tbody>
-            <tfoot class="tfoot active">
-                <th></th>
-                <th>{{__('db.Total')}}</th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tfoot>
+            <tfoot class="tfoot active"><tr>
+                <th></th><th>{{__('db.Total')}}</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+            </tr>
         </table>
     </div>
 </section>
@@ -135,6 +128,10 @@
                           <input type="number" name="exchange_rate" class="form-control" step="any" min="0.000001" value="{{ $currency->exchange_rate ?? 1 }}" required>
                       </div>
 
+
+                      <div class="col-md-6 form-group"><label>Construction Project</label><select class="form-control selectpicker" name="project_id" data-live-search="true"><option value="">None / General</option>@foreach($construction_projects as $project)<option value="{{$project->id}}">{{$project->title}}</option>@endforeach</select></div>
+                      <div class="col-md-6 form-group"><label>Site</label><select class="form-control selectpicker" name="site_id" data-live-search="true"><option value="">None</option>@foreach($construction_sites as $site)<option value="{{$site->id}}">{{$site->name}} @if($site->project) — {{$site->project->title}} @endif</option>@endforeach</select></div>
+                      <div class="col-md-12 form-group"><label>External / Transaction Reference</label><input type="text" name="external_reference" class="form-control" maxlength="191"></div>
                       <div class="col-md-12 form-group">
                           <label>{{__('db.note')}}</label>
                           <textarea name="note" rows="3" class="form-control" maxlength="1000"></textarea>
@@ -205,6 +202,10 @@
                           <input type="number" name="exchange_rate" class="form-control" step="any" min="0.000001" required>
                       </div>
 
+
+                      <div class="col-md-6 form-group"><label>Construction Project</label><select class="form-control selectpicker" name="project_id" data-live-search="true"><option value="">None / General</option>@foreach($construction_projects as $project)<option value="{{$project->id}}">{{$project->title}}</option>@endforeach</select></div>
+                      <div class="col-md-6 form-group"><label>Site</label><select class="form-control selectpicker" name="site_id" data-live-search="true"><option value="">None</option>@foreach($construction_sites as $site)<option value="{{$site->id}}">{{$site->name}} @if($site->project) — {{$site->project->title}} @endif</option>@endforeach</select></div>
+                      <div class="col-md-12 form-group"><label>External / Transaction Reference</label><input type="text" name="external_reference" class="form-control" maxlength="191"></div>
                       <div class="col-md-12 form-group">
                           <label>{{__('db.note')}}</label>
                           <textarea name="note" rows="3" class="form-control" maxlength="1000"></textarea>
@@ -252,6 +253,9 @@
         $("#edit-money-transfer-modal input[name='amount']").val($(this).data('amount'));
         $("#edit-money-transfer-modal select[name='currency_id']").val($(this).data('currency_id'));
         $("#edit-money-transfer-modal input[name='exchange_rate']").val($(this).data('exchange_rate'));
+        $("#edit-money-transfer-modal select[name='project_id']").val($(this).data('project_id'));
+        $("#edit-money-transfer-modal select[name='site_id']").val($(this).data('site_id'));
+        $("#edit-money-transfer-modal input[name='external_reference']").val($(this).data('external_reference'));
         $("#edit-money-transfer-modal textarea[name='note']").val($(this).data('note'));
         $('.selectpicker').selectpicker('refresh');
     });
@@ -277,7 +281,7 @@
         'columnDefs': [
             {
                 "orderable": false,
-                'targets': [0, 9]
+                'targets': [0, 12]
             },
             {
                 'render': function(data, type, row, meta){
@@ -405,6 +409,7 @@
             $( dt_selector.column( 5 ).footer() ).html(dt_selector.cells( rows, 5, { page: 'current' } ).data().sum().toFixed({{gen_setting()->decimal}}));
         }
         else {
+            var rows = dt_selector.rows({ page: 'current' }).indexes();
             $( dt_selector.column( 5 ).footer() ).html(dt_selector.cells( rows, 5, { page: 'current' } ).data().sum().toFixed({{gen_setting()->decimal}}));
         }
     }

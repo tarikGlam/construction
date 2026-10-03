@@ -12,7 +12,7 @@ class Income extends Model
     use HasFactory, SerializesCashRegisterAttachment, \App\Traits\WarehouseScoped;
 
     protected $fillable =[
-        "reference_no", "income_category_id", "warehouse_id", "account_id", "user_id", "cash_register_id", "amount", "note", "created_at"
+        "reference_no", "income_category_id", "warehouse_id", "account_id", "user_id", "cash_register_id", "amount", "note", "created_at", "project_id", "site_id", "cost_category_id"
     ];
 
     public function warehouse()
@@ -23,4 +23,7 @@ class Income extends Model
     public function incomeCategory() {
     	return $this->belongsTo(IncomeCategory::class);
     }
+
+    public function project() { return $this->belongsTo(\Modules\Project\Entities\Project::class); }
+    public function site() { return $this->belongsTo(\Modules\Construction\Entities\ConstructionSite::class, 'site_id'); }
 }

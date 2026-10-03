@@ -10,7 +10,7 @@ class Transfer extends Model
 
     protected $fillable =[
 
-        "reference_no", "user_id", "status", "from_warehouse_id", "to_warehouse_id", "item", "total_qty", "total_tax", "total_cost", "shipping_cost", "grand_total", "document", "note", "is_sent", "created_at"
+        "reference_no", "user_id", "status", "from_warehouse_id", "to_warehouse_id", "item", "total_qty", "total_tax", "total_cost", "shipping_cost", "grand_total", "document", "note", "is_sent", "created_at", "project_id", "site_id", "approved_by", "dispatch_date", "receipt_date"
     ];
 
     public function fromWarehouse()
@@ -32,4 +32,7 @@ class Transfer extends Model
     {
          return $this->hasMany('App\Models\ProductTransfer','transfer_id');
     }
+
+    public function project() { return $this->belongsTo(\Modules\Project\Entities\Project::class); }
+    public function site() { return $this->belongsTo(\Modules\Construction\Entities\ConstructionSite::class, 'site_id'); }
 }

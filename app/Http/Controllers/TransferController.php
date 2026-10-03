@@ -295,7 +295,9 @@ class TransferController extends Controller
         $role = Role::find(Auth::user()->role_id);
         if($role->hasPermissionTo('transfers-add')){
             $lims_warehouse_list = Warehouse::withoutGlobalScope('authorized_warehouse')->where('is_active', true)->get();
-            return view('backend.transfer.create', compact('lims_warehouse_list'));
+            $construction_projects = class_exists(\Modules\Project\Entities\Project::class) ? \Modules\Project\Entities\Project::orderBy('title')->get() : collect();
+            $construction_sites = class_exists(\Modules\Construction\Entities\ConstructionSite::class) ? \Modules\Construction\Entities\ConstructionSite::with('project')->orderBy('name')->get() : collect();
+            return view('backend.transfer.create', compact('lims_warehouse_list', 'construction_projects', 'construction_sites'));
         }
         else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
@@ -984,7 +986,9 @@ class TransferController extends Controller
             $lims_warehouse_list = Warehouse::withoutGlobalScope('authorized_warehouse')->where('is_active',true)->get();
             $lims_transfer_data = Transfer::find($id);
             $lims_product_transfer_data = ProductTransfer::where('transfer_id', $id)->get();
-            return view('backend.transfer.edit', compact('lims_warehouse_list', 'lims_transfer_data', 'lims_product_transfer_data'));
+            $construction_projects = class_exists(\Modules\Project\Entities\Project::class) ? \Modules\Project\Entities\Project::orderBy('title')->get() : collect();
+            $construction_sites = class_exists(\Modules\Construction\Entities\ConstructionSite::class) ? \Modules\Construction\Entities\ConstructionSite::with('project')->orderBy('name')->get() : collect();
+            return view('backend.transfer.edit', compact('lims_warehouse_list', 'lims_transfer_data', 'lims_product_transfer_data', 'construction_projects', 'construction_sites'));
         }
         else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
@@ -1260,6 +1264,12 @@ class TransferController extends Controller
                 ProductTransfer::create($product_transfer);
         }
 
+        if (\Illuminate\Support\Facades\Schema::hasColumn('transfers', 'approved_by')) {
+            $newStatus = (int) ($data['status'] ?? $lims_transfer_data->status);
+            if ($newStatus !== 2 && empty($data['approved_by'])) $data['approved_by'] = $lims_transfer_data->approved_by ?: Auth::id();
+            if (in_array($newStatus, [1, 3], true) && empty($data['dispatch_date'])) $data['dispatch_date'] = $lims_transfer_data->dispatch_date ?: now()->toDateString();
+            if ($newStatus === 1 && empty($data['receipt_date'])) $data['receipt_date'] = $lims_transfer_data->receipt_date ?: now()->toDateString();
+        }
         $lims_transfer_data->update($data);
         if ((int) $lims_transfer_data->status === 1) {
             foreach (ProductTransfer::where('transfer_id', $id)->get() as $completedLine) {
@@ -1391,6 +1401,10 @@ class TransferController extends Controller
         }
 
         $lims_transfer_data->status = 1;
+        if (\Illuminate\Support\Facades\Schema::hasColumn('transfers', 'receipt_date')) {
+            $lims_transfer_data->receipt_date = $lims_transfer_data->receipt_date ?: now()->toDateString();
+            $lims_transfer_data->approved_by = $lims_transfer_data->approved_by ?: Auth::id();
+        }
         $lims_transfer_data->save();
 
         DB::commit();

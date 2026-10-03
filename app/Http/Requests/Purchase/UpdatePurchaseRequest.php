@@ -25,6 +25,8 @@ class UpdatePurchaseRequest extends FormRequest
             'currency_id' => 'required|exists:currencies,id,is_active,1',
             'exchange_rate' => ['required', new \App\Rules\ValidTransactionExchangeRate()],
             'warehouse_id' => 'required|exists:warehouses,id',
+            'project_id' => 'nullable|exists:projects,id',
+            'site_id' => 'nullable|exists:construction_sites,id',
             'product_code' => 'required|array',
             'product_code.*' => 'required|string',
             'qty' => 'required|array',

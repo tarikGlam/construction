@@ -1,0 +1,6 @@
+@extends('backend.layout.main')
+@section('content')
+<div class="container-fluid"><h4>Payments Due</h4><p class="text-muted">Consolidated supplier and subcontractor obligations. Red rows are overdue.</p>
+<form class="row mb-3"><div class="col-md-4"><select class="form-control" name="project_id"><option value="">All projects</option>@foreach($projects as $p)<option value="{{$p->id}}" @selected($projectId==$p->id)>{{$p->title}}</option>@endforeach</select></div><div class="col-md-2"><button class="btn btn-primary">Filter</button></div></form>
+<div class="card"><div class="card-body table-responsive"><table class="table table-bordered"><thead><tr><th>Type</th><th>Party</th><th>Project</th><th>Reference</th><th>Due date</th><th class="text-right">Outstanding</th></tr></thead><tbody>@forelse($rows as $r)<tr @if($r->overdue) class="table-danger" @endif><td>{{$r->type}}</td><td>{{$r->party}}</td><td>{{$r->project ?: '—'}}</td><td>{{$r->reference}}</td><td>{{$r->due_date ?: '—'}}</td><td class="text-right">{{number_format($r->amount,config('decimal',2))}}</td></tr>@empty<tr><td colspan="6" class="text-center">No outstanding obligations.</td></tr>@endforelse</tbody><tfoot><tr><th colspan="5">Total</th><th class="text-right">{{number_format($rows->sum('amount'),config('decimal',2))}}</th></tr></tfoot></table></div></div></div>
+@endsection
