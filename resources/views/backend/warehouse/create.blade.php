@@ -23,7 +23,6 @@
                     <th>{{__('db.Phone Number')}}</th>
                     <th>{{__('db.email')}}</th>
                     <th>{{__('db.Address')}}</th>
-                    <th>{{__('db.POS Type')}}</th>
                     <th>{{__('db.Number of Product')}}</th>
                     <th>{{__('db.Stock Quantity')}}</th>
                     <th>{{__('db.action')}}</th>
@@ -63,14 +62,6 @@
           <div class="form-group">
             <label>{{__('db.Address')}} *</label>
             <textarea class="form-control" rows="3" name="address" required></textarea>
-          </div>
-          <div class="form-group">
-              <label><strong>{{__('db.POS Type')}}</strong></label>
-              <select name="pos_type" class="form-control selectpicker">
-                  <option value="regular">{{__('db.Regular POS')}}</option>
-                  <option value="restaurant">{{__('db.Restaurant POS')}}</option>
-                  <option value="both">{{__('db.Regular + Restaurant')}}</option>
-              </select>
           </div>
           <div class="form-group">
             <input type="submit" value="{{__('db.submit')}}" class="btn btn-primary">
@@ -171,7 +162,6 @@
                 $("#editModal input[name='email']").val(data['email']);
                 $("#editModal textarea[name='address']").val(data['address']);
                 $("#editModal input[name='warehouse_id']").val(data['id']);
-                $("#editModal select[name='pos_type']").val(data['pos_type'] || 'regular').selectpicker('refresh');
             });
         });
 
@@ -234,7 +224,6 @@
             {data: 'phone', name: 'phone'},
             {data: 'email', name: 'email'},
             {data: 'address', name: 'address'},
-            {data: 'pos_type', name: 'pos_type'},
             {data: 'number_of_product', name: 'number_of_product'},
             {data: 'stock_qty', name: 'stock_qty'},
             {

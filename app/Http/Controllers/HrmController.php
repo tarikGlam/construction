@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
-class HRMController extends Controller
+class HrmController extends Controller
 {
     /**
      * Show the HRM panel main page with tabs

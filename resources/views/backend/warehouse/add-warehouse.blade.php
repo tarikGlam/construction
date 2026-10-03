@@ -26,14 +26,6 @@
             <textarea required class="form-control" rows="3" name="address"></textarea>
           </div>
           <div class="form-group">
-              <label><strong>{{__('db.POS Type')}}</strong></label>
-              <select name="pos_type" class="form-control selectpicker">
-                  <option value="regular">{{__('db.Regular POS')}}</option>
-                  <option value="restaurant">{{__('db.Restaurant POS')}}</option>
-                  <option value="both">{{__('db.Regular + Restaurant')}}</option>
-              </select>
-          </div>
-          <div class="form-group">
             <input type="submit" value="{{__('db.submit')}}" class="btn btn-primary warehouse-submit-btn">
           </div>
       </div>

@@ -19,6 +19,7 @@ use App\Models\Supplier;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Support\TranslationSeedFile;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -60,6 +61,8 @@ class ConstructionDemoSeeder extends Seeder
     /** @return array<string, mixed> */
     private function seedFoundation(): array
     {
+        $this->seedEnglishTranslations();
+
         $currency = Currency::firstOrCreate(
             ['code' => 'USD'],
             ['name' => 'US Dollar', 'symbol' => '$', 'exchange_rate' => 1, 'is_active' => true]
@@ -143,15 +146,43 @@ class ConstructionDemoSeeder extends Seeder
         return compact('currency', 'unit', 'category', 'warehouse', 'account', 'admin', 'employees', 'client');
     }
 
+    private function seedEnglishTranslations(): void
+    {
+        $existingKeys = DB::table('translations')
+            ->where('locale', 'en')
+            ->where('group', 'db')
+            ->pluck('key')
+            ->flip();
+
+        $rows = collect(TranslationSeedFile::load(database_path('seeders/Tenant/translations/en.php')))
+            ->reject(fn (array $row): bool => $existingKeys->has($row['key']))
+            ->map(fn (array $row): array => [
+                'locale' => 'en',
+                'group' => 'db',
+                'key' => $row['key'],
+                'value' => $row['value'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+        foreach ($rows->chunk(1000) as $chunk) {
+            DB::table('translations')->insert($chunk->all());
+        }
+
+        \App\Models\Translation::forgetCachedTranslations();
+    }
+
     private function seedAdministrator(Warehouse $warehouse, Account $account): User
     {
-        // Stock Ledger is a retained core Construction surface. Its legacy
-        // permission normally comes from the retail demo seeder, so bootstrap
-        // it here for a fresh standalone database.
-        DB::table('permissions')->updateOrInsert(
-            ['name' => 'stock-report', 'guard_name' => 'web'],
-            ['created_at' => now(), 'updated_at' => now()]
-        );
+        // These retained stock/workforce surfaces query legacy permissions
+        // directly. Bootstrap only the permissions the Construction UI uses
+        // so a fresh standalone database does not depend on the retail seeder.
+        foreach (['stock-report', 'employees-index', 'employees-add', 'department', 'attendance', 'payroll'] as $permission) {
+            DB::table('permissions')->updateOrInsert(
+                ['name' => $permission, 'guard_name' => 'web'],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+        }
 
         $administratorRoleId = DB::table('roles')->where('id', 1)->value('id');
         if (!$administratorRoleId) {
